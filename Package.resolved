@@ -1,0 +1,23 @@
+{
+  "pins" : [
+    {
+      "identity" : "kivypythoncore",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PythonSwiftLink/KivyPythonCore",
+      "state" : {
+        "revision" : "3e94967f69ca5036648d65dd48bed574f0ccb8f9",
+        "version" : "311.0.0"
+      }
+    },
+    {
+      "identity" : "kivyswiftlink",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/PythonSwiftLink/KivySwiftLink",
+      "state" : {
+        "revision" : "d7c56b24ef0193784249b126c0392dc3876ad431",
+        "version" : "311.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}
