@@ -86,13 +86,18 @@ public class KivyLauncher {
 	private func pythonHome() {
 		
 		let resourcePath = Bundle.main.resourceURL!
-		let python_home = "PYTHONHOME=\(resourcePath)"
-		putenv(python_home)
+		
 		let site_paths = "\(site_paths.joined(separator: ":"))"
-		let python_lib = PythonLibrary.pythonLibrary!
-		print(python_lib)
+		//
+		let python_root = PythonLibrary.home.bundleURL
+		let python_lib = python_root.appendingPathComponent("lib")
+		//let lib_parent = python_lib.deletingLastPathComponent()
+		print(python_root)
 		let site_packages = resourcePath.appendingPathComponent("site-packages")
-		let python_path = "PYTHONPATH=\(resourcePath):\(python_lib):\(site_packages):."
+		let python_path = "PYTHONPATH=\(python_root.path):\(python_lib.path):\(site_packages):."
+		
+		let python_home = "PYTHONHOME=\(python_root.path)"
+		putenv(python_home)
 		putenv(python_path)
 	}
 	
