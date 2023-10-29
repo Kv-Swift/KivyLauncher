@@ -78,9 +78,9 @@ public class KivyLauncher {
 		// IOS_IS_WINDOWED=True disables fullscreen and then statusbar is shown
 		putenv("IOS_IS_WINDOWED=\(IOS_IS_WINDOWED ? "True" : "False")")
 		
-#if DEBUG
-		putenv("KIVY_NO_CONSOLELOG=\(KIVY_NO_CONSOLELOG)")
-#endif
+		//#if DEBUG
+		//putenv("KIVY_NO_CONSOLELOG=\(KIVY_NO_CONSOLELOG)")
+		//#endif
 	}
 	
 	private func pythonHome() {
