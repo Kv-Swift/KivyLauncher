@@ -13,8 +13,8 @@ let package = Package(
             targets: ["KivyLauncher"]),
     ],
 	dependencies: [
-		.package(url: "https://github.com/PythonSwiftLink/KivyPythonCore", .upToNextMajor(from: .init(311, 0, 0))),
-		.package(url: "https://github.com/PythonSwiftLink/KivySwiftLink", .upToNextMajor(from: .init(311, 0, 0))),
+		.package(url: "https://github.com/KivySwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
+		.package(url: "https://github.com/KivySwiftLink/PythonSwiftLink", .upToNextMajor(from: .init(311, 0, 0))),
 	],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
@@ -22,9 +22,9 @@ let package = Package(
         .target(
             name: "KivyLauncher",
 			dependencies: [
-				.product(name: "PySwiftObject", package: "KivySwiftLink"),
-				.product(name: "PythonSwiftCore", package: "KivySwiftLink"),
-				.product(name: "PythonLibrary", package: "KivyPythonCore")
+				.product(name: "PySwiftObject", package: "PythonSwiftLink"),
+				.product(name: "PythonSwiftCore", package: "PythonSwiftLink"),
+				.product(name: "PythonLibrary", package: "PythonCore")
 			]
 		),
 
