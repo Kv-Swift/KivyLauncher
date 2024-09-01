@@ -23,8 +23,8 @@ let package = Package(
             name: "KivyLauncher",
 			dependencies: [
 				.product(name: "PySwiftObject", package: "PythonSwiftLink"),
-				.product(name: "PythonSwiftCore", package: "PythonSwiftLink"),
-				.product(name: "PythonLibrary", package: "PythonCore")
+				.product(name: "PySwiftCore", package: "PythonSwiftLink"),
+				.product(name: "PythonCore", package: "PythonCore")
 			]
 		),
 
