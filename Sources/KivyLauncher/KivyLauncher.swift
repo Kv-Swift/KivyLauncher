@@ -5,7 +5,7 @@
 //
 
 import UIKit
-import PythonSwiftCore
+import PySwiftCore
 import PySwiftObject
 //// import PythonCore
 import PythonLibrary
@@ -23,7 +23,7 @@ func putenv(_ s: String) {
 
 public class KivyLauncher {
 	
-	let PYTHON_VERSION: String = "3.10"
+	let PYTHON_VERSION: String = "3.11"
 	
 	let IOS_IS_WINDOWED: Bool = false
 	let KIVY_NO_CONSOLELOG: Int = 1

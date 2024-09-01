@@ -24,7 +24,8 @@ let package = Package(
 			dependencies: [
 				.product(name: "PySwiftObject", package: "PythonSwiftLink"),
 				.product(name: "PySwiftCore", package: "PythonSwiftLink"),
-				.product(name: "PythonCore", package: "PythonCore")
+				.product(name: "PythonCore", package: "PythonCore"),
+				.product(name: "PythonLibrary", package: "PythonCore")
 			]
 		),
 
