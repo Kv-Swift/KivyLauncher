@@ -10,6 +10,8 @@ import PySwiftObject
 //// import PythonCore
 import PythonLibrary
 
+
+
 fileprivate
 func putenv(_ s: String) {
 	let _count = s.utf8.count + 1
@@ -21,12 +23,79 @@ func putenv(_ s: String) {
 	putenv(result)
 }
 
+fileprivate func setenv(_ name: UnsafePointer<CChar>?, _ value: UnsafePointer<CChar>?) {
+	setenv(name, value, 1)
+}
+fileprivate func setenv(_ name: UnsafePointer<CChar>?, _ value: Int) {
+	return String(value).withCString { value in
+		setenv(name, value, 1)
+	}
+	
+}
+
+@dynamicMemberLookup
+struct KivyEnvironment {
+	
+	subscript(dynamicMember key: String) -> String? {
+		get {
+			if let result = key.withCString(getenv) {
+				return .init(cString: result)
+			}
+			return nil
+		}
+		set {
+			_ = key.withCString { _key in
+				setenv(_key, newValue, 1)
+			}
+		}
+	}
+	
+	subscript(dynamicMember key: String) -> Int? {
+		get {
+			if let result = key.withCString(getenv) {
+				return .init(String(cString: result))
+			}
+			return nil
+		}
+		set {
+			key.withCString { _key in
+				if let newValue = newValue {
+					setenv(_key, String(newValue), 1)
+					return
+				}
+				setenv(_key, nil, 1)
+			}
+		}
+	}
+	subscript(dynamicMember key: String) -> Bool? {
+		get {
+			if let result = key.withCString(getenv) {
+				return .init(String(cString: result).lowercased())
+			}
+			return nil
+		}
+		set {
+			key.withCString { _key in
+				if let newValue = newValue, let boolValue = newValue ? "True" : "False" {
+					setenv(_key, boolValue, 1)
+					return
+				}
+				setenv(_key, nil, 1)
+			}
+		}
+	}
+	
+}
+
+var env = KivyEnvironment()
+
+
 public class KivyLauncher {
 	
 	let PYTHON_VERSION: String = "3.11"
 	
 	let IOS_IS_WINDOWED: Bool = false
-	let KIVY_NO_CONSOLELOG: Int = 1
+	var KIVY_CONSOLELOG: Bool = true
 	var prog: String
 	let site_paths: [String]
 	var pyswiftImports: [PySwiftModuleImport]
@@ -57,29 +126,42 @@ public class KivyLauncher {
 	}
 	
 	private func pythonSettings() {
-		putenv("PYTHONOPTIMIZE=2")
-		putenv("PYTHONDONTWRITEBYTECODE=1")
-		putenv("PYTHONNOUSERSITE=1")
-		putenv("PYTHONPATH=.")
-		putenv("PYTHONUNBUFFERED=1")
-		putenv("LC_CTYPE=UTF-8")
+		
+		//putenv("PYTHONOPTIMIZE=2")
+		env.PYTHONOPTIMIZE = 2
+		//putenv("PYTHONDONTWRITEBYTECODE=1")
+		env.PYTHONDONTWRITEBYTECODE = 1
+		//putenv("PYTHONNOUSERSITE=1")
+		env.PYTHONNOUSERSITE = 1
+		//putenv("PYTHONPATH=.")
+		env.PYTHONPATH = "."
+		//putenv("PYTHONUNBUFFERED=1")
+		env.PYTHONUNBUFFERED = 1
+		//putenv("LC_CTYPE=UTF-8")
+		env.LC_CTYPE = "UTF-8"
 		// putenv("PYTHONVERBOSE=1")
 		// putenv("PYOBJUS_DEBUG=1")
 	}
 	
 	private func kivySettings() {
 		// Kivy environment to prefer some implementation on iOS platform
-		putenv("KIVY_BUILD=ios")
-		putenv("KIVY_WINDOW=sdl2")
-		putenv("KIVY_IMAGE=imageio,tex,gif,sdl2")
-		putenv("KIVY_AUDIO=sdl2")
-		putenv("KIVY_GL_BACKEND=sdl2")
+		//putenv("KIVY_BUILD=ios")
+		env.KIVY_BUILD = "ios"
+//		putenv("KIVY_WINDOW=sdl2")
+		env.KIVY_WINDOW = "sdl2"
+		//putenv("KIVY_IMAGE=imageio,tex,gif,sdl2")
+		env.KIVY_IMAGE = "imageio,tex,gif,sdl2"
+		//putenv("KIVY_AUDIO=sdl2")
+		env.KIVY_AUDIO = "sdl2"
+		//putenv("KIVY_GL_BACKEND=sdl2")
+		env.KIVY_GL_BACKEND = "sdl2"
 		
 		// IOS_IS_WINDOWED=True disables fullscreen and then statusbar is shown
-		putenv("IOS_IS_WINDOWED=\(IOS_IS_WINDOWED ? "True" : "False")")
-		
+		//putenv("IOS_IS_WINDOWED=\(IOS_IS_WINDOWED ? "True" : "False")")
+		env.IOS_IS_WINDOWED = IOS_IS_WINDOWED
 		//#if DEBUG
 		//putenv("KIVY_NO_CONSOLELOG=\(KIVY_NO_CONSOLELOG)")
+		env.KIVY_NO_CONSOLELOG = KIVY_CONSOLELOG ? "0" : "1"
 		//#endif
 	}
 	
@@ -87,18 +169,26 @@ public class KivyLauncher {
 		
 		let resourcePath = Bundle.main.resourceURL!
 		
-		let site_paths = "\(site_paths.joined(separator: ":"))"
-		//
 		let python_root = PythonLibrary.home.bundleURL
+		
+		//let python_home = "PYTHONHOME=\(python_root.path)"
+		//putenv(python_home)
+		env.PYTHONHOME = python_root.path
+		
+		
+		let site_paths = "\(site_paths.joined(separator: ":"))"
 		let python_lib = python_root.appendingPathComponent("lib")
 		//let lib_parent = python_lib.deletingLastPathComponent()
-		print(python_root)
 		let site_packages = resourcePath.appendingPathComponent("site-packages")
-		let python_path = "PYTHONPATH=\(python_root.path):\(python_lib.path):\(site_packages):."
 		
-		let python_home = "PYTHONHOME=\(python_root.path)"
-		putenv(python_home)
-		putenv(python_path)
+		//let python_path = "PYTHONPATH=\(python_root.path):\(python_lib.path):\(site_packages):."
+		//putenv(python_path)
+		env.PYTHONPATH = "\(python_root.path):\(python_lib.path):\(site_packages):."
+		
+		
+		
+		
+		
 	}
 	
 	private func pySwiftImports() {
@@ -200,7 +290,7 @@ public class KivyLauncher {
 		for i in 0..<_argc {
 			_python_argv[i] = Py_DecodeLocale(argv[i], nil)
 		}
-		PySys_SetArgv(argc, _python_argv)
+		//PySys_SetArgv(argc, _python_argv)
 		
 		load_custom_builtin_importer()
 		
