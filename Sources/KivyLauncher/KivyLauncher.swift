@@ -106,14 +106,15 @@ public class KivyLauncher {
 		} else {
 			throw CocoaError.error(.fileNoSuchFile)
 		}
-		
+	}
+	
+	public func setup() {
 		pythonSettings()
 		kivySettings()
 		export_orientation()
 		pythonHome()
 		pySwiftImports()
 		Py_Initialize()
-		
 	}
 	
 	private func pythonSettings() {
