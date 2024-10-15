@@ -153,7 +153,7 @@ public class KivyLauncher {
 		env.IOS_IS_WINDOWED = IOS_IS_WINDOWED
 		//#if DEBUG
 		//putenv("KIVY_NO_CONSOLELOG=\(KIVY_NO_CONSOLELOG)")
-		env.KIVY_NO_CONSOLELOG = KIVY_CONSOLELOG ? "0" : "1"
+		//env.KIVY_NO_CONSOLELOG = KIVY_CONSOLELOG ? "0" : "1"
 		//#endif
 	}
 	
