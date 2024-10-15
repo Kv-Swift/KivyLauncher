@@ -12,26 +12,17 @@ import PythonLibrary
 
 
 
-fileprivate
-func putenv(_ s: String) {
-	let _count = s.utf8.count + 1
-	let result = UnsafeMutablePointer<Int8>.allocate(capacity: _count)
-	s.withCString { (baseAddress) in
-		result.initialize(from: baseAddress, count: _count)
-	}
-	
-	putenv(result)
-}
-
-fileprivate func setenv(_ name: UnsafePointer<CChar>?, _ value: UnsafePointer<CChar>?) {
-	setenv(name, value, 1)
-}
-fileprivate func setenv(_ name: UnsafePointer<CChar>?, _ value: Int) {
-	return String(value).withCString { value in
-		setenv(name, value, 1)
-	}
-	
-}
+//fileprivate
+//func putenv(_ s: String) {
+//	let _count = s.utf8.count + 1
+//	let result = UnsafeMutablePointer<Int8>.allocate(capacity: _count)
+//	s.withCString { (baseAddress) in
+//		result.initialize(from: baseAddress, count: _count)
+//	}
+//	
+//	putenv(result)
+//}
+//
 
 @dynamicMemberLookup
 struct KivyEnvironment {
@@ -207,7 +198,8 @@ public class KivyLauncher {
 	private func export_orientation() {
 		let info = Bundle.main.infoDictionary
 		let orientations = info?["UISupportedInterfaceOrientations"] as? [AnyHashable]
-		var result = "KIVY_ORIENTATION="
+		//var result = "KIVY_ORIENTATION="
+		var result = ""
 		for i in 0..<(orientations?.count ?? 0) {
 			var item = orientations?[i] as? String
 			item = (item as NSString?)?.substring(from: 22)
@@ -217,7 +209,8 @@ public class KivyLauncher {
 			result = result + (item ?? "")
 		}
 		
-		putenv(result)
+		//putenv(result)
+		env.KIVY_ORIENTATION = result
 #if DEBUG
 		print("Available orientation: \(result)")
 #endif
