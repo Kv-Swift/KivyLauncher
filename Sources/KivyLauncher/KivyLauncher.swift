@@ -86,10 +86,10 @@ public class KivyLauncher {
 	let PYTHON_VERSION: String = "3.11"
 	
 	let IOS_IS_WINDOWED: Bool = false
-	var KIVY_CONSOLELOG: Bool = true
-	var prog: String
-	let site_paths: [String]
-	var pyswiftImports: [PySwiftModuleImport]
+	public var KIVY_CONSOLELOG: Bool = true
+	public var prog: String
+	public var site_paths: [String]
+	public var pyswiftImports: [PySwiftModuleImport]
 	
 	
 	public init(site_paths: [URL], pyswiftImports: [PySwiftModuleImport]) throws {
