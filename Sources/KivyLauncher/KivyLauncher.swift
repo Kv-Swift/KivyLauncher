@@ -1,84 +1,11 @@
-//
-//  SDL_main.swift
-//  Kivy-iOS
-//
-//
 
 import UIKit
 import PySwiftCore
 import PySwiftObject
 //// import PythonCore
 import PythonLibrary
+import KivyCore
 
-
-
-//fileprivate
-//func putenv(_ s: String) {
-//	let _count = s.utf8.count + 1
-//	let result = UnsafeMutablePointer<Int8>.allocate(capacity: _count)
-//	s.withCString { (baseAddress) in
-//		result.initialize(from: baseAddress, count: _count)
-//	}
-//	
-//	putenv(result)
-//}
-//
-
-@dynamicMemberLookup
-struct KivyEnvironment {
-	
-	subscript(dynamicMember key: String) -> String? {
-		get {
-			if let result = key.withCString(getenv) {
-				return .init(cString: result)
-			}
-			return nil
-		}
-		set {
-			_ = key.withCString { _key in
-				setenv(_key, newValue, 1)
-			}
-		}
-	}
-	
-	subscript(dynamicMember key: String) -> Int? {
-		get {
-			if let result = key.withCString(getenv) {
-				return .init(String(cString: result))
-			}
-			return nil
-		}
-		set {
-			key.withCString { _key in
-				if let newValue = newValue {
-					setenv(_key, String(newValue), 1)
-					return
-				}
-				setenv(_key, nil, 1)
-			}
-		}
-	}
-	subscript(dynamicMember key: String) -> Bool? {
-		get {
-			if let result = key.withCString(getenv) {
-				return .init(String(cString: result).lowercased())
-			}
-			return nil
-		}
-		set {
-			key.withCString { _key in
-				if let newValue = newValue, let boolValue = newValue ? "True" : "False" {
-					setenv(_key, boolValue, 1)
-					return
-				}
-				setenv(_key, nil, 1)
-			}
-		}
-	}
-	
-}
-
-var env = KivyEnvironment()
 
 
 public class KivyLauncher {
@@ -91,6 +18,7 @@ public class KivyLauncher {
 	public var site_paths: [String]
 	public var pyswiftImports: [PySwiftModuleImport]
 	
+	public var env = Environment()
 	
 	public init(site_paths: [URL], pyswiftImports: [PySwiftModuleImport]) throws {
 		if #available(iOS 16, *) {
@@ -99,8 +27,8 @@ public class KivyLauncher {
 			self.site_paths = site_paths.map(\.path)
 		}
 		self.pyswiftImports = pyswiftImports
-		chdir("YourApp")
 		
+		chdir("YourApp")
 		if let _prog = Bundle.main.path(forResource: "YourApp/main", ofType: "pyc") {
 			prog = _prog
 		} else {
@@ -114,6 +42,8 @@ public class KivyLauncher {
 		export_orientation()
 		pythonHome()
 		pySwiftImports()
+	}
+	public func start() {
 		Py_Initialize()
 	}
 	
@@ -153,7 +83,9 @@ public class KivyLauncher {
 		env.IOS_IS_WINDOWED = IOS_IS_WINDOWED
 		//#if DEBUG
 		//putenv("KIVY_NO_CONSOLELOG=\(KIVY_NO_CONSOLELOG)")
-		//env.KIVY_NO_CONSOLELOG = KIVY_CONSOLELOG ? "0" : "1"
+		if !KIVY_CONSOLELOG {
+			env.KIVY_NO_CONSOLELOG = "1"
+		}
 		//#endif
 	}
 	
@@ -186,9 +118,9 @@ public class KivyLauncher {
 	private func pySwiftImports() {
 		// add PySwiftMpdules to Python's import list
 		for _import in pyswiftImports {
-#if DEBUG
+			#if DEBUG
 			print("Importing PySwiftModule:",String(cString: _import.name))
-#endif
+			#endif
 			if PyImport_AppendInittab(_import.name, _import.module) == -1 {
 				PyErr_Print()
 				fatalError()
@@ -212,9 +144,9 @@ public class KivyLauncher {
 		
 		//putenv(result)
 		env.KIVY_ORIENTATION = result
-#if DEBUG
+		#if DEBUG
 		print("Available orientation: \(result)")
-#endif
+		#endif
 	}
 	
 	
@@ -288,7 +220,6 @@ public class KivyLauncher {
 		
 		load_custom_builtin_importer()
 		
-		//let prog = Bundle.main.path(forResource: "YourApp/main", ofType: "pyc")!
 		var ret: Int32
 		if let fd = fopen(prog, "r") {
 			
@@ -311,5 +242,7 @@ public class KivyLauncher {
 	}
 }
 
-
-
+//
+//
+//@freestanding(declaration, names: arbitrary)
+//public macro SDL2Main(_ closure: (_ kivy: KivyLauncher)->Void) = #externalMacro(module: "KivyLauncherMacros", type: "CreateSDL2Main")
