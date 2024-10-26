@@ -15,19 +15,21 @@ public class KivyLauncher {
 	let IOS_IS_WINDOWED: Bool = false
 	public var KIVY_CONSOLELOG: Bool = true
 	public var prog: String
+	public var site_packages: URL
 	public var site_paths: [String]
 	public var pyswiftImports: [PySwiftModuleImport]
 	
 	public var env = Environment()
 	
-	public init(site_paths: [URL], pyswiftImports: [PySwiftModuleImport]) throws {
+	public init(site_packages: URL, site_paths: [URL], pyswiftImports: [PySwiftModuleImport]) throws {
 		if #available(iOS 16, *) {
 			self.site_paths = site_paths.map({$0.path()})
 		} else {
 			self.site_paths = site_paths.map(\.path)
 		}
+		self.site_packages = site_packages
 		self.pyswiftImports = pyswiftImports
-		
+		self.pyswiftImports.append(.ios)
 		chdir("YourApp")
 		if let _prog = Bundle.main.path(forResource: "YourApp/main", ofType: "pyc") {
 			prog = _prog
@@ -94,25 +96,15 @@ public class KivyLauncher {
 		let resourcePath = Bundle.main.resourceURL!
 		
 		let python_root = PythonLibrary.home.bundleURL
-		
-		//let python_home = "PYTHONHOME=\(python_root.path)"
-		//putenv(python_home)
+	
 		env.PYTHONHOME = python_root.path
-		
 		
 		let site_paths = "\(site_paths.joined(separator: ":"))"
 		let python_lib = python_root.appendingPathComponent("lib")
-		//let lib_parent = python_lib.deletingLastPathComponent()
-		let site_packages = resourcePath.appendingPathComponent("site-packages")
+		//let site_packages = resourcePath.appendingPathComponent("site-packages")
 		
-		//let python_path = "PYTHONPATH=\(python_root.path):\(python_lib.path):\(site_packages):."
-		//putenv(python_path)
 		env.PYTHONPATH = "\(python_root.path):\(python_lib.path):\(site_packages):."
-		
-		
-		
-		
-		
+
 	}
 	
 	private func pySwiftImports() {
