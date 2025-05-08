@@ -67,8 +67,7 @@ let package = Package(
         .target(
             name: "KivyLauncher",
 			dependencies: [
-				.product(name: "PySwiftObject", package: "PySwiftKit"),
-				.product(name: "PySwiftCore", package: "PySwiftKit"),
+				.product(name: "SwiftonizeModules", package: "PySwiftKit"),
 				.product(name: "PythonCore", package: "PythonCore"),
 				.product(name: "PythonLibrary", package: "PythonCore"),
 				.product(name: "KivyCore", package: "KivyCore"),
