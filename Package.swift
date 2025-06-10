@@ -37,11 +37,6 @@ let pykit: Target.Dependency = if kivy {
     .product(name: "SwiftonizeModules", package: "PySwiftKit")
 }
 
-let kivycore: Target.Dependency = if kivy {
-    .product(name: "SwiftonizeModules", package: "PySwiftKit")
-} else {
-    .product(name: "SwiftonizeModules", package: "PySwiftKit")
-}
 
 let package = Package(
     name: "KivyLauncher",
@@ -53,7 +48,7 @@ let package = Package(
             targets: ["KivyLauncher"]),
     ],
 	dependencies: [
-		.package(url: "https://github.com/KivySwiftLink/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
+		.package(url: "https://github.com/kv-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
 //		.package(url: "https://github.com/KivySwiftLink/KivyCore", .upToNextMajor(from: .init(311, 0, 0))),
         kivycore_package,
 //		.package(url: "https://github.com/KivySwiftLink/PythonSwiftLink", .upToNextMajor(from: .init(311, 0, 0))),
@@ -75,7 +70,7 @@ let package = Package(
             name: "KivyLauncher",
 			dependencies: [
 				.product(name: "SwiftonizeModules", package: "PySwiftKit"),
-				.product(name: "PythonCore", package: "PythonCore"),
+				//.product(name: "PythonCore", package: "PythonCore"),
 				.product(name: "PythonLibrary", package: "PythonCore"),
                 .product(name: "KivyCore", package: "KivyCore", condition: .when(platforms: [.iOS])),
                 
