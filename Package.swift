@@ -9,13 +9,19 @@ let kivy = true
 let local = false
 
 let pykit_package: Package.Dependency = if kivy {
-    .package(url: "https://github.com/KivySwiftLink/PySwiftKit", from: .init(311, 0, 0))
+    .package(url: "https://github.com/kv-swift/PySwiftKit", from: .init(311, 0, 0))
 } else {
     if local {
-        .package(path: "/Users/codebuilder/Documents/GitHub/PySwiftKit")
+        .package(path: "../PySwiftKit")
     } else {
-        .package(url: "https://github.com/PythonSwiftLink/PySwiftKit", from: .init(311, 0, 0))
+        .package(url: "https://github.com/py-swift/PySwiftKit", from: .init(311, 0, 0))
     }
+}
+
+let py_launcher_package : Package.Dependency = if local {
+    .package(path: "../PythonLauncher")
+} else {
+    .package(url: "https://github.com/kv-swift/PythonLauncher", from: .init(0, 0, 0))
 }
 
 let kivycore_package: Package.Dependency = if local {
@@ -39,7 +45,7 @@ let kivycore: Target.Dependency = if kivy {
 
 let package = Package(
     name: "KivyLauncher",
-	platforms: [.iOS(.v13)],
+    platforms: [.iOS(.v13), .macOS(.v11)],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .library(
@@ -51,7 +57,8 @@ let package = Package(
 //		.package(url: "https://github.com/KivySwiftLink/KivyCore", .upToNextMajor(from: .init(311, 0, 0))),
         kivycore_package,
 //		.package(url: "https://github.com/KivySwiftLink/PythonSwiftLink", .upToNextMajor(from: .init(311, 0, 0))),
-        pykit_package
+        pykit_package,
+        py_launcher_package
 		//.package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
 	],
     targets: [
@@ -70,11 +77,14 @@ let package = Package(
 				.product(name: "SwiftonizeModules", package: "PySwiftKit"),
 				.product(name: "PythonCore", package: "PythonCore"),
 				.product(name: "PythonLibrary", package: "PythonCore"),
-				.product(name: "KivyCore", package: "KivyCore"),
+                .product(name: "KivyCore", package: "KivyCore", condition: .when(platforms: [.iOS])),
+                
+                "PythonLauncher"
 				//"KivyLauncherMacros"
 			],
             swiftSettings: [
-                .define("KIVY")
+                .define("KIVY"),
+                .define("ANDROID", .when(platforms: [.android]))
             ]
 		),
 		

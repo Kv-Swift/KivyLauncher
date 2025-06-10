@@ -11,7 +11,7 @@ import Foundation
 public extension KivyLauncher {
 	
 	@dynamicMemberLookup
-	public struct Environment {
+    struct Environment {
 		
 		public subscript(dynamicMember key: String) -> String? {
 			get {
