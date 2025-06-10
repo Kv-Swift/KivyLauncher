@@ -27,7 +27,7 @@ let py_launcher_package : Package.Dependency = if local {
 let kivycore_package: Package.Dependency = if local {
     .package(path: "../KivyCore")
 } else {
-    .package(url: "https://github.com/KivySwiftLink/KivyCore", from: .init(311, 0, 0))
+    .package(url: "https://github.com/kv-swift/KivyCore", from: .init(311, 0, 0))
 }
 
 
@@ -49,23 +49,13 @@ let package = Package(
     ],
 	dependencies: [
 		.package(url: "https://github.com/kv-swift/PythonCore", .upToNextMajor(from: .init(311, 0, 0))),
-//		.package(url: "https://github.com/KivySwiftLink/KivyCore", .upToNextMajor(from: .init(311, 0, 0))),
         kivycore_package,
-//		.package(url: "https://github.com/KivySwiftLink/PythonSwiftLink", .upToNextMajor(from: .init(311, 0, 0))),
         pykit_package,
         py_launcher_package
-		//.package(url: "https://github.com/apple/swift-syntax.git", from: "509.0.0"),
 	],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
-//		.macro(
-//			name: "KivyLauncherMacros",
-//			dependencies: [
-//				.product(name: "SwiftSyntaxMacros", package: "swift-syntax"),
-//				.product(name: "SwiftCompilerPlugin", package: "swift-syntax")
-//			]
-//		),
         .target(
             name: "KivyLauncher",
 			dependencies: [
@@ -73,9 +63,7 @@ let package = Package(
 				//.product(name: "PythonCore", package: "PythonCore"),
 				.product(name: "PythonLibrary", package: "PythonCore"),
                 .product(name: "KivyCore", package: "KivyCore", condition: .when(platforms: [.iOS])),
-                
                 "PythonLauncher"
-				//"KivyLauncherMacros"
 			],
             swiftSettings: [
                 .define("KIVY"),
