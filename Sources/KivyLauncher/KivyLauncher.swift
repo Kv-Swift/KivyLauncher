@@ -14,144 +14,7 @@ import UIKit
 import KivyCore
 #endif
 
-public class _KivyLauncher: PyLauncher {
-    public var PYTHON_VERSION: String = "3.11"
-    
-    
-    let IOS_IS_WINDOWED: Bool = false
-    public var KIVY_CONSOLELOG: Bool = true
-    
-    public var program: String?
-    
-    public var python_library: PathKit.Path
-    
-    public var site_packages: PathKit.Path
-    
-    public var other_site_packages: [PathKit.Path]
-    
-    public var pyswiftImports: [PySwiftModuleImport]
-    
-    public var env: PythonLauncher.PyEnvironment
-    
-    public func preLaunch() throws {
-        pythonSettings()
-        kivySettings()
-    }
-    
-    public func onLaunch() throws {
-        
-    }
 
-    
-    public func onExit() throws {
-        
-    }
-    
-    func hmm() async {
-        
-    }
-    
-    init() {
-        fatalError()
-    }
-    
-}
-
-extension _KivyLauncher {
-    private func pythonSettings() {
-        
-        //putenv("PYTHONOPTIMIZE=2")
-        env.PYTHONOPTIMIZE = 2
-        //putenv("PYTHONDONTWRITEBYTECODE=1")
-        env.PYTHONDONTWRITEBYTECODE = 1
-        //putenv("PYTHONNOUSERSITE=1")
-        env.PYTHONNOUSERSITE = 1
-        //putenv("PYTHONPATH=.")
-        env.PYTHONPATH = "."
-        //putenv("PYTHONUNBUFFERED=1")
-        env.PYTHONUNBUFFERED = 1
-        //putenv("LC_CTYPE=UTF-8")
-        env.LC_CTYPE = "UTF-8"
-        // putenv("PYTHONVERBOSE=1")
-        // putenv("PYOBJUS_DEBUG=1")
-    }
-    
-    private func kivySettings() {
-        // Kivy environment to prefer some implementation on iOS platform
-        env.KIVY_BUILD = "ios"
-        env.KIVY_WINDOW = "sdl2"
-        env.KIVY_IMAGE = "imageio,tex,gif,sdl2"
-        env.KIVY_AUDIO = "sdl2"
-        env.KIVY_GL_BACKEND = "sdl2"
-        
-        // IOS_IS_WINDOWED=True disables fullscreen and then statusbar is shown
-        env.IOS_IS_WINDOWED = IOS_IS_WINDOWED
-        //#if DEBUG
-        //putenv("KIVY_NO_CONSOLELOG=\(KIVY_NO_CONSOLELOG)")
-        if !KIVY_CONSOLELOG {
-            env.KIVY_NO_CONSOLELOG = "1"
-        }
-        //#endif
-    }
-}
-
-@discardableResult
-private func load_custom_builtin_importer() -> Int32 {
-    """
-    import sys, imp, types
-    from os import environ
-    from os.path import exists, join
-    try:
-        # python 3
-        import _imp
-        EXTS = _imp.extension_suffixes()
-        sys.modules['subprocess'] = types.ModuleType(name='subprocess')
-        sys.modules['subprocess'].PIPE = None
-        sys.modules['subprocess'].STDOUT = None
-        sys.modules['subprocess'].DEVNULL = None
-        sys.modules['subprocess'].CalledProcessError = Exception
-        sys.modules['subprocess'].check_output = None
-    except ImportError:
-        EXTS = ['.so']
-    # Fake redirection to supress console output
-    if environ.get('KIVY_NO_CONSOLE', '0') == '1':
-        class fakestd(object):
-            def write(self, *args, **kw): pass
-            def flush(self, *args, **kw): pass
-        sys.stdout = fakestd()
-        sys.stderr = fakestd()
-    # Custom builtin importer for precompiled modules
-    class CustomBuiltinImporter(object):
-        def find_module(self, fullname, mpath=None):
-            # print(f'find_module() fullname={fullname} mpath={mpath}')
-            if '.' not in fullname:
-                return
-            if not mpath:
-                return
-            part = fullname.rsplit('.')[-1]
-            for ext in EXTS:
-               fn = join(list(mpath)[0], '{}{}'.format(part, ext))
-               # print('find_module() {}'.format(fn))
-               if exists(fn):
-                   return self
-            return
-        def load_module(self, fullname):
-            f = fullname.replace('.', '_')
-            mod = sys.modules.get(f)
-            if mod is None:
-                # print('LOAD DYNAMIC', f, sys.modules.keys())
-                try:
-                    mod = imp.load_dynamic(f, f)
-                except ImportError:
-                    # import traceback; traceback.print_exc();
-                    # print('LOAD DYNAMIC FALLBACK', fullname)
-                    mod = imp.load_dynamic(fullname, fullname)
-                sys.modules[fullname] = mod
-                return mod
-            return mod
-    sys.meta_path.insert(0, CustomBuiltinImporter())
-    """.withCString(PyRun_SimpleString)
-}
 
 public class KivyLauncher {
 	
@@ -305,63 +168,64 @@ public class KivyLauncher {
 	}
 	
 	
-	@discardableResult
-	private func load_custom_builtin_importer() -> Int32 {
-		"""
-		import sys, imp, types
-		from os import environ
-		from os.path import exists, join
-		try:
-			# python 3
-			import _imp
-			EXTS = _imp.extension_suffixes()
-			sys.modules['subprocess'] = types.ModuleType(name='subprocess')
-			sys.modules['subprocess'].PIPE = None
-			sys.modules['subprocess'].STDOUT = None
-			sys.modules['subprocess'].DEVNULL = None
-			sys.modules['subprocess'].CalledProcessError = Exception
-			sys.modules['subprocess'].check_output = None
-		except ImportError:
-			EXTS = ['.so']
-		# Fake redirection to supress console output
-		if environ.get('KIVY_NO_CONSOLE', '0') == '1':
-			class fakestd(object):
-				def write(self, *args, **kw): pass
-				def flush(self, *args, **kw): pass
-			sys.stdout = fakestd()
-			sys.stderr = fakestd()
-		# Custom builtin importer for precompiled modules
-		class CustomBuiltinImporter(object):
-			def find_module(self, fullname, mpath=None):
-				# print(f'find_module() fullname={fullname} mpath={mpath}')
-				if '.' not in fullname:
-					return
-				if not mpath:
-					return
-				part = fullname.rsplit('.')[-1]
-				for ext in EXTS:
-				   fn = join(list(mpath)[0], '{}{}'.format(part, ext))
-				   # print('find_module() {}'.format(fn))
-				   if exists(fn):
-					   return self
-				return
-			def load_module(self, fullname):
-				f = fullname.replace('.', '_')
-				mod = sys.modules.get(f)
-				if mod is None:
-					# print('LOAD DYNAMIC', f, sys.modules.keys())
-					try:
-						mod = imp.load_dynamic(f, f)
-					except ImportError:
-						# import traceback; traceback.print_exc();
-						# print('LOAD DYNAMIC FALLBACK', fullname)
-						mod = imp.load_dynamic(fullname, fullname)
-					sys.modules[fullname] = mod
-					return mod
-				return mod
-		sys.meta_path.insert(0, CustomBuiltinImporter())
-		""".withCString(PyRun_SimpleString)
-	}
+    @discardableResult
+    private func load_custom_builtin_importer() -> Int32 {
+        """
+        import sys, imp, types
+        from os import environ
+        from os.path import exists, join
+        try:
+            # python 3
+            import _imp
+            EXTS = _imp.extension_suffixes()
+            sys.modules['subprocess'] = types.ModuleType(name='subprocess')
+            sys.modules['subprocess'].PIPE = None
+            sys.modules['subprocess'].STDOUT = None
+            sys.modules['subprocess'].DEVNULL = None
+            sys.modules['subprocess'].CalledProcessError = Exception
+            sys.modules['subprocess'].CompletedProcess = None
+            sys.modules['subprocess'].check_output = None
+        except ImportError:
+            EXTS = ['.so']
+        # Fake redirection to supress console output
+        if environ.get('KIVY_NO_CONSOLE', '0') == '1':
+            class fakestd(object):
+                def write(self, *args, **kw): pass
+                def flush(self, *args, **kw): pass
+            sys.stdout = fakestd()
+            sys.stderr = fakestd()
+        # Custom builtin importer for precompiled modules
+        class CustomBuiltinImporter(object):
+            def find_module(self, fullname, mpath=None):
+                # print(f'find_module() fullname={fullname} mpath={mpath}')
+                if '.' not in fullname:
+                    return
+                if not mpath:
+                    return
+                part = fullname.rsplit('.')[-1]
+                for ext in EXTS:
+                   fn = join(list(mpath)[0], '{}{}'.format(part, ext))
+                   # print('find_module() {}'.format(fn))
+                   if exists(fn):
+                       return self
+                return
+            def load_module(self, fullname):
+                f = fullname.replace('.', '_')
+                mod = sys.modules.get(f)
+                if mod is None:
+                    # print('LOAD DYNAMIC', f, sys.modules.keys())
+                    try:
+                        mod = imp.load_dynamic(f, f)
+                    except ImportError:
+                        # import traceback; traceback.print_exc();
+                        # print('LOAD DYNAMIC FALLBACK', fullname)
+                        mod = imp.load_dynamic(fullname, fullname)
+                    sys.modules[fullname] = mod
+                    return mod
+                return mod
+        sys.meta_path.insert(0, CustomBuiltinImporter())
+        """.withCString(PyRun_SimpleString)
+    }
 	
 	public func run_main(_ argc: Int32, _ argv: UnsafeMutablePointer<UnsafeMutablePointer<CChar>?>) throws -> Int32 {
 		
